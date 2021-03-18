@@ -237,8 +237,6 @@ bpy.ops.object.modifier_add(type = 'CLOTH')
 bpy.context.object.modifiers["Cloth"].settings.use_internal_springs = False
 bpy.context.object.modifiers["Cloth"].settings.use_pressure = True
 bpy.context.object.modifiers["Cloth"].settings.tension_stiffness = 0.01
-bpy.context.object.modifiers["Cloth"].settings.compression_stiffness = 0.011 # slightly higher than tension stiffness
-bpy.context.object.modifiers["Cloth"].settings.uniform_pressure_force = 1.3 
 
 bpy.ops.object.modifier_add(type = 'COLLISION')
 
@@ -248,18 +246,25 @@ create_cells()
 # remove the prototype cell
 bpy.data.objects.remove(bpy.data.objects['Icosphere'])
 
-# animate to apply physics 
-bpy.context.scene.frame_current = 1
-for f in range(9):
-  bpy.context.view_layer.update()
-  bpy.context.scene.frame_current += 1
+#-------------------------------------------------------------------------------
+# for standalone version 
+#-------------------------------------------------------------------------------
 
-# save the cells in an obj file
-for obj in bpy.data.collections["Duct"].all_objects: obj.select_set(False)
-for obj in bpy.data.collections["Cells"].all_objects: obj.select_set(True)
-bpy.ops.export_scene.obj(filepath="sample.obj", use_selection=True)
+# animate (to apply physics) 
+#bpy.context.scene.frame_current = 1
+#for f in range(9):
+#  bpy.context.view_layer.update()
+#  bpy.context.scene.frame_current += 1
 
+# save the duct and cell meshes in an obj file
+#for obj in bpy.data.collections["Duct"].all_objects: obj.select_set(False)
+#for obj in bpy.data.collections["Cells"].all_objects: obj.select_set(True)
+#bpy.ops.export_scene.obj(filepath="sample.obj", use_selection=True)
 
+#-------------------------------------------------------------------------------
+# DEBUG: run interactive interpreter
+#import__('code').interact(local=dict(globals(), **locals()))
+#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
