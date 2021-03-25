@@ -4,6 +4,8 @@
 *.blend*
 *.obj
 *.mtl
+*.stl
+log.*
 
 #----------------------------------
 # Mac excludes

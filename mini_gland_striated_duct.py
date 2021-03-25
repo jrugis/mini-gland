@@ -6,20 +6,37 @@
 # J.rugis
 #
 # Blender python console:
-#  filename = "/Users/jrug001/Desktop/nesi00119/mini-gland/mini_gland_00.py"
+#  filename = "/Users/jrug001/Desktop/nesi00119/mini-gland/mini_gland_striated_duct.py"
 #  exec(compile(open(filename).read(), filename, 'exec'))
 #
 # Blender headless (Mac):
 #  cd ~/Desktop/nesi00119/mini-gland
-#  /Applications/Blender.app/Contents/MacOS/Blender --background --python mini_gland_00.py
+#  /Applications/Blender.app/Contents/MacOS/Blender --background --python mini_gland__striated_duct.py
 #
-
+# Python using blender import:
+#  cd ~/Desktop/nesi00119/mini-gland
+#  python3 mini_gland_striated_duct.py > log.txt
+#
 import bpy
 import bmesh
 import math
 import mathutils
 import numpy as np
 import random
+
+#-------------------------------------------------------------------------------
+# class (structure) definitions
+#-------------------------------------------------------------------------------
+
+class cPts: # duct segment end-point structure
+  def __init__(self, position):
+    self.position = position
+    
+class cDseg: # duct segment structure
+  def __init__(self, idx_out, idx_in, ctype):
+    self.idx_out = idx_out
+    self.idx_in = idx_in
+    self.ctype = ctype
 
 #-------------------------------------------------------------------------------
 # global constants
@@ -37,7 +54,7 @@ cell_types = {
 # duct segment end-points: position
 PTS = (
   cPts(mathutils.Vector((0.0, 0.0, 0.0))), 
-  cPts(mathutils.Vector((0.0, 0.0, 15.0)))
+  cPts(mathutils.Vector((0.0, 0.0, 40.0)))
   )
 
 # duct segment connectivity
@@ -46,7 +63,7 @@ PTS = (
 DSEG = (
   cDseg(0, 1, "striated"))
 
-C_RADIUS = 1.0             # cell seed radius
+C_RADIUS = 2.3             # cell seed radius
 EPSILON = 0.005            # a small numerical offset
 
 #-------------------------------------------------------------------------------
@@ -136,16 +153,16 @@ def create_seg_cells(s):
   z2 = PTS[s.idx_in].position.z
 
   #r1 = cell_types[s.ctype]['radii'][0] + ((cell_types[s.ctype]['radii'][1] - cell_types[s.ctype]['radii'][0]) / 6.0)  # near inner wall
-  r1 = cell_types[s.ctype]['radii'][0] + 1.1 * C_RADIUS# near inner wall
+  r1 = cell_types[s.ctype]['radii'][1] - 2.5 * C_RADIUS# near inner wall
   z12 = z2 - z1
-  for i in range(50): # try to create this number of random cell seeds
+  for i in range(120): # try to create this number of random cell seeds
     create = False
     for j in range(80000): # with many retries to help fill gaps in the seed distribution
       a1 = random.uniform(0.0, 2.0 * math.pi)
       # a duct cell seed placement point
       z = random.uniform(z1 + C_RADIUS, z2 - C_RADIUS) 
       p = mathutils.Vector((r1*math.sin(a1), r1*math.cos(a1), z))
-      if len(cell_centers)==0 or not too_close(p, 2.1 * C_RADIUS): #   but accept only if not too close to other seeds
+      if len(cell_centers)==0 or not too_close(p, 3.0 * C_RADIUS): #   but accept only if not too close to other seeds
         create = True
         break
     if create:
@@ -213,15 +230,15 @@ bpy.data.objects.remove(bpy.data.objects['Icosphere'])
 #-------------------------------------------------------------------------------
 
 # animate (to apply physics) 
-#bpy.context.scene.frame_current = 1
-#for f in range(9):
-#  bpy.context.view_layer.update()
-#  bpy.context.scene.frame_current += 1
+bpy.context.scene.frame_current = 1
+for f in range(38):
+  bpy.context.view_layer.update()
+  bpy.context.scene.frame_current += 1
 
 # save the duct and cell meshes in an obj file
-#for obj in bpy.data.collections["Duct"].all_objects: obj.select_set(False)
-#for obj in bpy.data.collections["Cells"].all_objects: obj.select_set(True)
-#bpy.ops.export_scene.obj(filepath="sample.obj", use_selection=True)
+for obj in bpy.data.collections["Duct"].all_objects: obj.select_set(False)
+for obj in bpy.data.collections["Cells"].all_objects: obj.select_set(True)
+bpy.ops.export_mesh.stl(filepath="sample.stl", use_selection=True)
 
 #-------------------------------------------------------------------------------
 # DEBUG: run interactive interpreter
