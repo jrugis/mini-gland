@@ -11,12 +11,16 @@
 #
 # Blender headless (Mac):
 #  cd ~/Desktop/nesi00119/mini-gland
-#  /Applications/Blender.app/Contents/MacOS/Blender --background --python mini_gland__striated_duct.py
+#  NITER=38 OUTPUT=sample.stl /Applications/Blender.app/Contents/MacOS/Blender \
+#    --background --python mini_gland__striated_duct.py
 #
 # Python using blender import:
 #  cd ~/Desktop/nesi00119/mini-gland
-#  python3 mini_gland_striated_duct.py > log.txt
-#
+#  NITER=38 OUTPUT=sample.stl python3 mini_gland_striated_duct.py > log.txt
+
+import os
+from pathlib import Path
+
 import bpy
 import bmesh
 import math
@@ -229,16 +233,25 @@ bpy.data.objects.remove(bpy.data.objects['Icosphere'])
 # for standalone version 
 #-------------------------------------------------------------------------------
 
-# animate (to apply physics) 
-bpy.context.scene.frame_current = 1
-for f in range(38):
-  bpy.context.view_layer.update()
-  bpy.context.scene.frame_current += 1
+# check that environment variables have been defined
+if "NITER" in os.environ and "OUTPUT" in os.environ:
 
-# save the duct and cell meshes in an obj file
-for obj in bpy.data.collections["Duct"].all_objects: obj.select_set(False)
-for obj in bpy.data.collections["Cells"].all_objects: obj.select_set(True)
-bpy.ops.export_mesh.stl(filepath="sample.stl", use_selection=True)
+  # retrieve parameters from environment variables
+  n_iter = int(os.environ["NITER"])
+  output_path = Path(os.environ["OUTPUT"])
+
+  # animate (to apply physics)
+  bpy.context.scene.frame_current = 1
+  for f in range(n_iter):
+    bpy.context.view_layer.update()
+    bpy.context.scene.frame_current += 1
+
+  # save the duct and cell meshes in an obj file
+  for obj in bpy.data.collections["Duct"].all_objects: obj.select_set(False)
+  for obj in bpy.data.collections["Cells"].all_objects: obj.select_set(True)
+
+  output_path.parent.mkdir(parents=True, exist_ok=True)
+  bpy.ops.export_mesh.stl(filepath=str(output_path), use_selection=True)
 
 #-------------------------------------------------------------------------------
 # DEBUG: run interactive interpreter
